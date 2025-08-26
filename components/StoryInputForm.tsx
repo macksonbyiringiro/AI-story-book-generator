@@ -96,7 +96,7 @@ const StoryInputForm: React.FC<StoryInputFormProps> = ({ onSubmit, isLoading }) 
                 id="page-count"
                 min="3"
                 max="7"
-                step="2"
+                step="1"
                 value={pageCount}
                 onChange={(e) => setPageCount(Number(e.target.value))}
                 disabled={isLoading}

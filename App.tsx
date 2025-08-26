@@ -11,7 +11,7 @@ import { BookOpenIcon, DownloadIcon, LoadingSpinner, PlusCircleIcon, ShareIcon, 
 
 const LOCAL_STORAGE_key = 'ai-storybook';
 
-// Helper functions for sharing
+// Helper functions for sharing, moved outside the component for performance.
 const compressAndEncodeStory = (story: StoryBook): string => {
   const jsonString = JSON.stringify(story);
   const compressed = window.pako.deflate(jsonString);
