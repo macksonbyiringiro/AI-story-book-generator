@@ -1,12 +1,19 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { StoryBook, StoryPage, StoryTheme } from '../types';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
+let ai: GoogleGenAI | null = null;
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAiClient = (): GoogleGenAI => {
+    if (!process.env.API_KEY) {
+        // This error will be caught by the App component and displayed to the user.
+        throw new Error("The API_KEY environment variable is not set. Please configure it in your deployment settings.");
+    }
+    if (!ai) {
+        ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    }
+    return ai;
+};
+
 
 interface RawStoryPage {
   paragraph: string;
@@ -47,7 +54,8 @@ async function generateStoryContent(prompt: string, theme: StoryTheme, pageCount
   };
 
   try {
-    const response = await ai.models.generateContent({
+    const aiClient = getAiClient();
+    const response = await aiClient.models.generateContent({
       model: model,
       contents: fullPrompt,
       config: {
@@ -62,13 +70,17 @@ async function generateStoryContent(prompt: string, theme: StoryTheme, pageCount
     return storyData;
   } catch (error) {
     console.error("Error generating story content:", error);
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error("Failed to generate the story's text. Please try again.");
   }
 }
 
 async function generateImage(prompt: string, theme: StoryTheme): Promise<string> {
   try {
-    const response = await ai.models.generateImages({
+    const aiClient = getAiClient();
+    const response = await aiClient.models.generateImages({
       model: 'imagen-3.0-generate-002',
       prompt: `${prompt}, ${theme} theme, whimsical children's book illustration, vibrant colors, friendly characters, storybook style, digital art`,
       config: {
@@ -81,6 +93,9 @@ async function generateImage(prompt: string, theme: StoryTheme): Promise<string>
     return `data:image/jpeg;base64,${base64ImageBytes}`;
   } catch (error) {
     console.error("Error generating image:", error);
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error("Failed to generate an illustration. Please try again.");
   }
 }
